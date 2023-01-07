@@ -2,10 +2,10 @@
 name = "bb8-rusqlite"
 version = "0.1.0"
 description = "A bb8 connection manager for rusqlite"
-authors = ["Adam Harvey <adam@adamharvey.name>"]
-edition = "2018"
+authors = ["Adam Harvey <adam@adamharvey.name>", "Rajeev Athreya Jawaji <rajeevjawaji@gmail.com>"]
+edition = "2021"
 license = "MIT"
-repository = "https://github.com/LawnGnome/bb8-rusqlite"
+repository = "https://github.com/reji-zero/bb8_sqlite" 
 
 [dependencies]
 async-trait = "0.1"
@@ -19,3 +19,6 @@ anyhow = "1"
 futures = "0.3"
 tempfile = "3"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
+
+[dev-dependencies.rusqlite]
+features = ["bundled"]

@@ -10,7 +10,7 @@ use std::{
 
 use async_trait::async_trait;
 use bb8::ManageConnection;
-use rusqlite::{Connection, OpenFlags, NO_PARAMS};
+use rusqlite::{Connection, OpenFlags};
 
 #[cfg(test)]
 mod tests;
@@ -52,10 +52,7 @@ pub enum Error {
 
 impl RusqliteConnectionManager {
     /// Analogous to `rusqlite::Connection::open()`.
-    pub fn new<P>(path: P) -> Self
-    where
-        P: AsRef<Path>,
-    {
+    pub fn new<P: AsRef<Path>>(path: P) -> Self {
         Self(Arc::new(ConnectionOptions {
             mode: OpenMode::Plain,
             path: path.as_ref().into(),
@@ -63,10 +60,7 @@ impl RusqliteConnectionManager {
     }
 
     /// Analogous to `rusqlite::Connection::open_with_flags()`.
-    pub fn new_with_flags<P>(path: P, flags: OpenFlags) -> Self
-    where
-        P: AsRef<Path>,
-    {
+    pub fn new_with_flags<P: AsRef<Path>>(path: P, flags: OpenFlags) -> Self {
         Self(Arc::new(ConnectionOptions {
             mode: OpenMode::WithFlags { flags },
             path: path.as_ref().into(),
@@ -74,10 +68,7 @@ impl RusqliteConnectionManager {
     }
 
     /// Analogous to `rusqlite::Connection::open_with_flags_and_vfs()`.
-    pub fn new_with_flags_and_vfs<P>(path: P, flags: OpenFlags, vfs: &str) -> Self
-    where
-        P: AsRef<Path>,
-    {
+    pub fn new_with_flags_and_vfs<P: AsRef<Path>>(path: P, flags: OpenFlags, vfs: &str) -> Self {
         Self(Arc::new(ConnectionOptions {
             mode: OpenMode::WithFlagsAndVFS {
                 flags,
@@ -105,7 +96,7 @@ impl ManageConnection for RusqliteConnectionManager {
                 rusqlite::Connection::open_with_flags(&options.path, *flags)
             }
             OpenMode::WithFlagsAndVFS { flags, vfs } => {
-                rusqlite::Connection::open_with_flags_and_vfs(&options.path, *flags, &vfs)
+                rusqlite::Connection::open_with_flags_and_vfs(&options.path, *flags, vfs)
             }
         })
         .await??)
@@ -113,14 +104,14 @@ impl ManageConnection for RusqliteConnectionManager {
 
     async fn is_valid(
         &self,
-        conn: &mut bb8::PooledConnection<'_, Self>,
+        conn: &mut Self::Connection 
     ) -> Result<(), Self::Error> {
         // Matching bb8-postgres, we'll try to run a trivial query here. Using
         // block_in_place() gives better behaviour if the SQLite call blocks for
         // some reason, but means that we depend on the tokio multi-threaded
         // runtime being active. (We can't use spawn_blocking() here because
         // Connection isn't Sync.)
-        tokio::task::block_in_place(|| conn.execute("SELECT 1", NO_PARAMS))?;
+        tokio::task::block_in_place(|| conn.execute("SELECT 1", []))?;
         Ok(())
     }
 
