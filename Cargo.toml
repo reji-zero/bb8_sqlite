@@ -1,5 +1,5 @@
 [package]
-name = "bb8-rusqlite"
+name = "bb8-sqlite"
 version = "0.1.0"
 description = "A bb8 connection manager for rusqlite"
 authors = ["Adam Harvey <adam@adamharvey.name>", "Rajeev Athreya Jawaji <rajeevjawaji@gmail.com>"]

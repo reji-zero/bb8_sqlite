@@ -23,7 +23,7 @@ async fn example(path: &Path) -> anyhow::Result<()> {
             },
         )?;
 
-        Ok(conn.query_row("SELECT a FROM t", [] , |row| row.get(0))?)
+        Ok(conn.query_row("SELECT a FROM t", [], |row| row.get(0))?)
     })?;
 
     println!("we stored this value: {}", value);
