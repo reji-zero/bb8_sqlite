@@ -1,12 +1,12 @@
-use std::path::Path;
-
-use bb8_rusqlite::RusqliteConnectionManager;
+use bb8_sqlite::RusqliteConnectionManager;
 use rusqlite::named_params;
-use tempfile::NamedTempFile;
 use tokio::task;
 
-async fn example(path: &Path) -> anyhow::Result<()> {
-    let manager = RusqliteConnectionManager::new(path);
+const DATABASE_URL: &str = "sqlite://database.db?=mode=rwc";
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let manager = RusqliteConnectionManager::new(DATABASE_URL);
     let pool = bb8::Pool::builder().build(manager).await?;
     let conn = pool.get().await?;
 
@@ -27,19 +27,5 @@ async fn example(path: &Path) -> anyhow::Result<()> {
     })?;
 
     println!("we stored this value: {}", value);
-    Ok(())
-}
-
-fn main() -> anyhow::Result<()> {
-    let temp = NamedTempFile::new()?;
-
-    // Set up a runtime manually so we ensure all bb8 and rusqlite cleanup is
-    // done before temp cleanup, otherwise we end up with a race condition
-    // between the temporary file being removed and SQLite doing its final
-    // write.
-    let rt = tokio::runtime::Runtime::new()?;
-    rt.block_on(async { example(temp.path()).await })?;
-    drop(rt);
-
     Ok(())
 }
